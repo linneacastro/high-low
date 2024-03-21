@@ -1,0 +1,114 @@
+#!/bin/bash
+
+# NAME: Linnea P. Castro
+# CLASS: CSE 224
+# DATE: 02 NOV 2022
+# SYNOPSIS:
+
+# This Bash script plays a number guessing game with a user.  The user guesses a number and the computer is uses an algorithm to guess, narrow down, 
+# and ultimately select the exact number guessed.  The user gives feedback to the computer following each guess which allows the computer to 
+# process the algorithm with a more refined number range and also ensures that only legitimate numbers reach the function.
+
+# The default settings ask the user to think of a number between 1 and 100.  This script allows the user to customize the ceiling of numbers selected 
+# with a command line argument, and then stores that as the $high value instead of default 100.  At the beginning of a game, a counter is
+# initialized to 0 to keep track of total guesses.  I utilized one function in this script to run high and low values through an algorithm to
+# select the computer's guess.  The function also increments the total guess counter. 
+
+# I used two infinite loops in this script, the first to initialize gameplay.  The only ways out of this loop are for the computer to make a correct 
+# guess or for the user to be called out for cheating - both instances will exit the game.  The start of the gameplay loop checks for suspicious
+# play; if $high is less than low, the user has with or without intent, made a mistake giving feedback on the computer's guess. If $high > $low
+# the script will call the guess function, read the user's feedback as they key in either c, h, or l, store this key in $hint and then process it
+# in the checkinghint infinite loop.  If the user enters c, it means the computer's guess was correct.  The total number of guesses is printed 
+# and the game exits.  If the user enters l, it means the computer's guess was low.  The new low value will be set to guess+1, the script will break
+# from the checkinghint loop and head to the top of the gameplay loop.  The user entering h means the computer's guess was high and the new high
+# value will be set to high-1.  Anything other than h, c, or l entry from the user will prompt the computer to ask again, sending that key entry
+# to the top of the checkinghint loop for examination. 
+
+# Skills practiced: infinite loops for gameplay, creating a function, incrementing guesses inside the function and initializing variable outside of 
+# it, organizing and creating a bash script.   
+
+#
+# GUESS FUNCTION
+#
+function guess
+{
+guess=$(((high+low)/2)) # Algorithm for guess
+numberofguesses=$((numberofguesses+1)) # Keep track of how many guesses computer has made, Initialize OUTSIDE the function, increment INSIDE
+}
+
+#
+# START OF MAIN PROGRAM
+#
+high=$1 # If command line arg is given, this is the highest number user can guess, floor is 1
+
+if [[ "$1" == "" ]] # First checking if command line is empty, if yes:
+then
+  high=100 # High default is 100
+fi
+
+low=1 # Initialize low to 1
+
+echo "Hello, welcome to the High Low game!" # Welcome text, etc.
+echo "Here's how we'll play:"
+echo -e "After choosing your number, I'll begin guessing. \nHit 'h' if my guess is too high, 'l' if it's too low, and 'c' if I read your mind correctly!"
+echo -n "Think of a number between 1 and $high... Got it?  Press any key to start playing! "
+
+read -n 1 hint # Beginning to store what the user hits in the variable $hint (not officially using it just yet!)
+hint=$hint
+
+numberofguesses=0 # Initialize numberofguesses variable OUTSIDE of the function
+
+#
+# GAMEPLAY LOOP BEGINS 
+#
+gameplay=1  # Initialize gameplay variable to 1...
+while [[ $gameplay -eq 1 ]] # Then enter infinite while loop
+do
+
+if [[ $high -lt $low ]] # Check for suspicious gameplay... if high is less than low:
+then
+  echo -e "\nI think something fishy is going on here.  Bye." # High < Low , exit the game
+  exit
+fi
+
+guess # Calling guess function w current high/low values
+echo -n -e "\nIs your number $guess ? " # Printing value of $guess obtained from guess function
+read -n 1 hint # Reading the user's feedback on computer's guess: h/l/c/something else by mistake?
+hint=$hint # Storing user's feedback into $hint variable
+
+checkinghint=1 # Variable for entry into checking hint infinite loop
+while [[ $checkinghint -eq 1 ]] #Infinite while loop to check h/l/c/something else?
+do
+
+if [[ "$hint" == "c" ]] # Computer's guess was correct: user hit c
+then
+  echo -e "\nBingo!"
+  echo "I guessed your number in $numberofguesses guesses." # Total number of guesses we have been tallying gets printed
+  echo "Thanks for playing, bye!"
+  exit # Game exits
+fi
+
+if [[ "$hint" == "h" ]] # Computer's guess was high: user hit h
+then
+  high=$((guess-1)) # Adjust high value to be guess-1, so when we call guess function again, it will give new guess
+  break # Get out of "checkinghint" loop
+fi
+
+if [[ "$hint" == "l" ]] # Computer's guess was low: user hit l
+then
+  low=$((guess+1)) # Adjust low value to guess+1, next time guess function is called, new values will be used
+  break # Get out of "checkinghint" loop
+fi
+
+if [[ "$hint" != "c" ]] && [[ "$hint" != "h" ]] && [[ "$hint" != "l" ]] # If anything other than c/h/l is typed then:
+then
+  echo -n -e "\nI think you made a mistake.\nEnter c, h, or l for the number $guess: " # Ask user again, give them another chance
+  read -n 1 hint # Read what they key in as hint variable
+  hint=$hint # Store it in hint, no break statement in here, because we want to STAY in this loop until a c/l/h answer is given
+fi
+
+done
+
+done
+
+
